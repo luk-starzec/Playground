@@ -1,0 +1,50 @@
+﻿@inject HttpClient httpClient
+@inject TokenAuthenticationStateProvider tokenAuthStateProvider
+@inject NavigationManager navigationManager
+
+<EditForm class="login-form__from" Model="model" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+
+    <label class="login-form__label" for="login-frm-name">Name:</label>
+    <InputText class="login-form__input" @bind-Value="model.Name" id="login-frm-name" />
+    <ValidationMessage For="() => model.Name" />
+
+    <label class="login-form__label" for="login-frm-pass">Password:</label>
+    <InputText class="login-form__input" type="password" @bind-Value="model.Password" id="login-frm-pass" />
+    <ValidationMessage For="()=>model.Password" />
+
+    @if (showError)
+    {
+        <p class="validation-message">@error</p>
+    }
+
+    <button type="submit" class="login-form__button">
+        Log in
+    </button>
+
+</EditForm>
+
+@code {
+    LoginModel model = new();
+
+    string error = string.Empty;
+    bool showError => !string.IsNullOrEmpty(error);
+
+    private async Task HandleSubmit()
+    {
+        error = string.Empty;
+
+        var dto = new LoginDto(model.Name, model.Password);
+        var response = await httpClient.PostAsJsonAsync("/api/user/login", model);
+        var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+
+        if (result.IsSuccessful)
+        {
+            await tokenAuthStateProvider.Login(result.Token);
+            navigationManager.NavigateTo("/");
+        }
+        else
+            error = result.Error;
+    }
+
+}

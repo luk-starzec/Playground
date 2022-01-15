@@ -1,0 +1,36 @@
+﻿@page "/fetchvalue"
+@inject HttpClient Http
+
+<h3>Fetch value</h3>
+
+<div>
+    @simpleValue
+    <button @onclick="GetSimple">Get simple value</button>
+</div>
+
+<div>
+    @specialValue
+    <button @onclick="GetSpecial">Get special value</button>
+</div>
+
+@code {
+    string simpleValue = "";
+    string specialValue = "";
+
+    async Task GetSimple()
+    {
+        simpleValue = await Http.GetStringAsync("api/value");
+    }
+
+    async Task GetSpecial()
+    {
+        try
+        {
+            specialValue = await Http.GetStringAsync("api/value/special");
+        }
+        catch
+        {
+            specialValue = "Error";
+        }
+    }
+}

@@ -1,0 +1,38 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, world!</h1>
+
+<ul>
+    <li>
+        <AuthorizeView>
+            <NotAuthorized>
+                User not authorized
+            </NotAuthorized>
+            <Authorized>
+                User authorized
+            </Authorized>
+        </AuthorizeView>
+    </li>
+
+    <li>
+        <AuthorizeView>
+            This content is displayed only if the user is Authorized
+        </AuthorizeView>
+    </li>
+
+    <li>
+        <AuthorizeView Roles="Editor">
+            This is content for editor user only.
+        </AuthorizeView>
+    </li>
+
+    <li>
+        <AuthorizeView Roles="Admin">
+            This is content for admin user only.
+        </AuthorizeView>
+    </li>
+</ul>
+
+

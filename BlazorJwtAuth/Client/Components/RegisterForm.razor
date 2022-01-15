@@ -1,0 +1,103 @@
+﻿@inject HttpClient httpClient
+@inject TokenAuthenticationStateProvider tokenAuthStateProvider
+@inject NavigationManager navigationManager
+
+<EditForm Model="@model" OnValidSubmit="@HandleValidSubmit" class="register-form__form">
+    <DataAnnotationsValidator />
+
+    <label class="register-form__label" for="register-name">
+        Name:
+    </label>
+    <InputText class="register-form__input" id="register-name" @bind-Value="model.Name" />
+
+    <label class="register-form__label" for="register-password">
+        Password:
+    </label>
+    <InputText type="password" class="register-form__input" id="register-password" @bind-Value="model.Password" />
+
+    <label class="register-form__label" for="register-confirm">
+        Confirm:
+    </label>
+    <InputText type="password" class="register-form__input" id="register-confirm"
+               @bind-Value="model.PasswordConfirmation" />
+
+    <div>
+
+        <label class="register-form__label" for="register-editor">
+            editor
+        </label>
+        <InputCheckbox class="register-form__checkbox" id="register-editor" @bind-Value="model.IsEditor" />
+
+        <label class="register-form__label" for="register-admin">
+            admin
+        </label>
+        <InputCheckbox class="register-form__checkbox" id="register-admin" @bind-Value="model.IsAdmin" />
+
+    </div>
+
+    <button type="submit" class="register-form__submit-button" disabled=@buttonDisabled>
+        @buttonText
+    </button>
+
+    <ValidationSummary />
+
+    @if (showResultError)
+    {
+        <div class="validation-errors">
+            <p class="validation-message">@resultError</p>
+        </div>
+    }
+    @if (showResultSuccess)
+    {
+        <div class="register-form__success">
+            User registered
+        </div>
+    }
+
+</EditForm>
+
+@code {
+
+    private RegistrationModel model = new();
+
+    string resultError = string.Empty;
+    bool showResultError => !string.IsNullOrEmpty(resultError);
+    bool showResultSuccess;
+
+    bool buttonDisabled => buttonText == processingText;
+
+    const string submitText = "Submit";
+    const string processingText = "processing...";
+
+    string buttonText = submitText;
+
+    async Task HandleValidSubmit()
+    {
+        showResultSuccess = false;
+        buttonText = processingText;
+        resultError = string.Empty;
+
+        var roles = GetRoles();
+        var dto = new RegisterDto(model.Name, model.Password, roles);
+        var response = await httpClient.PostAsJsonAsync("/api/user/register", dto);
+        var result = await response.Content.ReadFromJsonAsync<RegisterResult>();
+
+        buttonText = submitText;
+
+        if (result?.IsSuccessful == true)
+            showResultSuccess = true;
+        else
+            resultError = result?.Error ?? "Error";
+
+    }
+
+    string[] GetRoles()
+    {
+        var roles = new List<string>();
+        if (model.IsEditor)
+            roles.Add("Editor");
+        if (model.IsAdmin)
+            roles.Add("Admin");
+        return roles.ToArray();
+    }
+}

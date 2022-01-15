@@ -1,0 +1,53 @@
+﻿@inherits LayoutComponentBase
+@inject TokenAuthenticationStateProvider tokenAuthStateProvider
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+
+            <AuthorizeView>
+
+                <Authorized>
+                    @userName
+                    <button @onclick="LogoutUser">
+                        <span class="oi oi-oi-account-logout" aria-hidden="true"></span> Log out
+                    </button>
+                </Authorized>
+
+                <NotAuthorized>
+                    <NavLink class="nav-link" href="login">
+                        <span class="oi oi-person" aria-hidden="true"></span> Log in
+                    </NavLink>
+                </NotAuthorized>
+
+            </AuthorizeView>
+
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    [CascadingParameter] Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    string userName;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user?.Identity?.IsAuthenticated == true)
+            userName = user.Identity.Name;
+    }
+
+    private async Task LogoutUser() => await tokenAuthStateProvider.Logout();
+
+}
