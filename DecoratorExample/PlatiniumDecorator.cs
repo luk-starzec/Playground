@@ -7,6 +7,8 @@ namespace DecoratorExample
     /// </summary>
     public class PlatiniumDecorator : IAccount
     {
+        private readonly string bonusDescription = "Platinium, 10$ with every deposit";
+
         private readonly IAccount account;
 
         public PlatiniumDecorator(IAccount account)
@@ -19,9 +21,14 @@ namespace DecoratorExample
 
         public void Deposit(decimal amount)
         {
+            account.Deposit(amount);
+
             var bonus = GetBonus(amount);
-            Amount += amount + bonus;
-            Console.WriteLine($"Depisited {amount }{(bonus > 0 ? $" (with {bonus} bonus)" : "")}. Total {Amount}");
+            if (bonus == 0)
+                return;
+
+            Amount += bonus;
+            Console.WriteLine($"Added bonus {bonus} ({bonusDescription})");
         }
 
         private decimal GetBonus(decimal amount)

@@ -35,6 +35,7 @@ namespace DecoratorExample
             account.Deposit(500);
             account.Withdraw(100);
             account.Deposit(1100);
+            Console.WriteLine($"Total: {account.Amount}");
         }
 
     }

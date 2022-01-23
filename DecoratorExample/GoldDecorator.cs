@@ -7,6 +7,8 @@ namespace DecoratorExample
     /// </summary>
     public class GoldDecorator : IAccount
     {
+        private readonly string bonusDescription = "Gold, 10% for deposits over 1000$";
+
         private readonly IAccount account;
 
         public GoldDecorator(IAccount account)
@@ -19,9 +21,14 @@ namespace DecoratorExample
 
         public void Deposit(decimal amount)
         {
+            account.Deposit(amount);
+
             var bonus = GetBonus(amount);
-            Amount += amount + bonus;
-            Console.WriteLine($"Depisited {amount }{(bonus > 0 ? $" (with {bonus} bonus)" : "")}. Total {Amount}");
+            if (bonus == 0)
+                return;
+
+            Amount += bonus;
+            Console.WriteLine($"Added bonus {bonus} ({bonusDescription})");
         }
 
         public void Withdraw(decimal amount)

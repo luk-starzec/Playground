@@ -15,20 +15,14 @@ namespace DecoratorExample
 
         public void Deposit(decimal amount)
         {
-            var bonus = GetBonus(amount);
-            Amount += amount + bonus;
-            Console.WriteLine($"Depisited {amount }{(bonus > 0 ? $" (with {bonus} bonus)" : "")}. Total {Amount}");
+            Amount += amount;
+            Console.WriteLine($"Depisited {amount}. Total {Amount}");
         }
 
         public void Withdraw(decimal amount)
         {
             Amount -= amount;
             Console.WriteLine($"Withdrawn {amount}. Remaining {Amount}");
-        }
-
-        public decimal GetBonus(decimal amount)
-        {
-            return 0;
         }
     }
 }
