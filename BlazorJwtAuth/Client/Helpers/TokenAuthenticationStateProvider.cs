@@ -19,13 +19,16 @@ public class TokenAuthenticationStateProvider : AuthenticationStateProvider
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var token = await _localStorage.GetItemAsync<string>("token");
-        var identity = string.IsNullOrWhiteSpace(token)
-            ? new ClaimsIdentity()
-            : new ClaimsIdentity(token.ParseClaimsFromJwt(), "jwt");
 
-        _httpClient.DefaultRequestHeaders.Authorization = string.IsNullOrWhiteSpace(token)
-            ? null
-            : new AuthenticationHeaderValue("bearer", token);
+        var isValid = !string.IsNullOrWhiteSpace(token) && CheckExpTime(token);
+
+        var identity = isValid
+            ? new ClaimsIdentity(token.ParseClaimsFromJwt(), "jwt")
+            : new ClaimsIdentity();
+
+        _httpClient.DefaultRequestHeaders.Authorization = isValid
+            ? new AuthenticationHeaderValue("bearer", token)
+            : null;
 
         return new AuthenticationState(new ClaimsPrincipal(identity));
     }
@@ -43,4 +46,25 @@ public class TokenAuthenticationStateProvider : AuthenticationStateProvider
 
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
+
+
+    private bool CheckExpTime(string token)
+    {
+        var claims = token.ParseClaimsFromJwt();
+        var expiry = claims.Where(claim => claim.Type.Equals("exp")).FirstOrDefault();
+        if (expiry == null)
+            return false;
+
+        var datetime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiry.Value));
+        if (datetime.UtcDateTime <= DateTime.UtcNow)
+            return false;
+
+        return true;
+    }
+
+    public void RefreshAuthenticationState()
+    {
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+    }
+
 }

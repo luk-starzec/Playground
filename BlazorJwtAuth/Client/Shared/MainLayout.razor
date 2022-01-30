@@ -37,7 +37,15 @@
 @code {
     [CascadingParameter] Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    string userName;
+    string userName = "";
+
+    System.Timers.Timer timer;
+
+    protected override void OnInitialized()
+    {
+        timer = new System.Timers.Timer { Interval = 10000 };
+        timer.Elapsed += (_, _) => tokenAuthStateProvider.RefreshAuthenticationState();
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -46,8 +54,17 @@
 
         if (user?.Identity?.IsAuthenticated == true)
             userName = user.Identity.Name;
+
+        if (user?.Identity?.IsAuthenticated == true)
+        {
+            if (!timer.Enabled)
+                timer.Enabled = true;
+        }
+        else
+        {
+            timer.Enabled = false;
+        }
     }
 
     private async Task LogoutUser() => await tokenAuthStateProvider.Logout();
-
 }

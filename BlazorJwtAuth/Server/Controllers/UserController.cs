@@ -66,7 +66,7 @@ public class UserController : ControllerBase
         }
 
         var creds = new SigningCredentials(_jwtSettings.SigningKey, SecurityAlgorithms.HmacSha256);
-        var expiry = DateTime.Now.AddDays(_jwtSettings.ExpiryInDays);
+        var expiry = DateTime.Now.AddSeconds(10); //DateTime.Now.AddDays(_jwtSettings.ExpiryInDays);
 
         var token = new JwtSecurityToken(
             _jwtSettings.Issuer,
